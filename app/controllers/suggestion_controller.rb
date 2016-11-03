@@ -152,12 +152,16 @@ class SuggestionController < ApplicationController
           @signuptopic.private_to = @user_id
           @signuptopic.save
           # if this team has topic, Expertiza will send an email (suggested_topic_approved_message) to this team
-          send_email
+          unless @user_id.nil?
+            send_email
+          end
         end
       end
     else
       # if this team has topic, Expertiza will send an email (suggested_topic_approved_message) to this team
-      send_email
+      unless @user_id.nil?
+        send_email
+      end
     end
   end
 
@@ -186,9 +190,11 @@ class SuggestionController < ApplicationController
 
   def approve
     @suggestion = Suggestion.find(params[:id])
-    @user_id = User.where(name: @suggestion.unityID).first.id
-    @team_id = TeamsUser.team_id(@suggestion.assignment_id, @user_id)
-    @topic_id = SignedUpTeam.topic_id(@suggestion.assignment_id, @user_id)
+    unless @user_id.nil?
+      @user_id = User.where(name: @suggestion.unityID).first.id
+      @team_id = TeamsUser.team_id(@suggestion.assignment_id, @user_id)
+      @topic_id = SignedUpTeam.topic_id(@suggestion.assignment_id, @user_id)
+    end
     @signuptopic = SignUpTopic.new
     @signuptopic.topic_identifier = 'S' + Suggestion.where("assignment_id = ? and id <= ?", @suggestion.assignment_id, @suggestion.id).size.to_s
     @signuptopic.topic_name = @suggestion.title
